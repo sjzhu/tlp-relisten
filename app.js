@@ -242,10 +242,11 @@ dateInput.addEventListener('keypress', (e) => {
 });
 
 // Load data on page load
-loadData();
-
-// Set today's date as default in the input
-window.addEventListener('load', () => {
-  const today = formatDateForInput(new Date());
-  dateInput.value = today;
+loadData().then((loaded) => {
+  if (loaded) {
+    // Set today's date as default and automatically display it
+    const today = formatDateForInput(new Date());
+    dateInput.value = today;
+    displayResults(today);
+  }
 });
