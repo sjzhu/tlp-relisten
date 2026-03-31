@@ -1,0 +1,10 @@
+{
+  "name": "easy-tlp-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simple API to resolve schedule week episodes and links",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
