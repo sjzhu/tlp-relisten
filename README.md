@@ -1,98 +1,79 @@
 # easy-tlp-tracker
 
-Very simple HTTP API that returns episodes for the schedule week containing:
+Find episodes for any week in **The Letters Page** relisten schedule.
 
-- today (default), or
-- a provided `date` query parameter in `YYYY-MM-DD` format.
+Enter a date (or leave blank for today), and the app displays all episodes scheduled for that week along with their direct links from `episodes.json`.
 
-For each episode in that week, it returns:
+## Features
 
-- episode name from `schedule.yml`
-- `link` from `episodes.json` (or `null` if no match is found)
+- **No backend required** — runs entirely in the browser
+- **Works on GitHub Pages** — static files only
+- **Responsive design** — works on mobile and desktop
+- **Handles edge cases** — validates dates, matches weeks correctly
 
-## Run
+## Development
+
+### Run locally
+
+For local development with live file changes, use Python's built-in server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000` in your browser.
+
+Alternatively, use Node's simple HTTP server:
+
+```bash
+npx http-server
+```
+
+### Server (Node.js)
+
+If you prefer the backend API approach, the `server.js` file provides a REST endpoint:
 
 ```bash
 npm start
 ```
 
-The server listens on:
+Endpoint: `GET http://localhost:3000/episodes?date=YYYY-MM-DD` (date optional)
 
-```text
-http://localhost:3000
+## Deploy to GitHub Pages
+
+1. Push your repository to GitHub
+2. Go to **Settings** → **Pages**
+3. Under "Build and deployment", select:
+   - **Source**: Deploy from a branch
+   - **Branch**: `main` (or your default branch)
+4. Save — your app will be live at `https://<username>.github.io/<repo-name>/`
+
+That's it! GitHub Pages will serve `index.html` automatically.
+
+## How it works
+
+1. Loads `schedule.yml` and `episodes.json` from the static files
+2. Parses the YAML schedule — dates represent **week-end dates**
+3. For a given date, finds the earliest week that ends on or after that date
+4. Looks up episode links from `episodes.json`
+5. Displays results in a clean, interactive UI
+
+### Schedule semantics
+
+Dates in `schedule.yml` represent the **end** of each week:
+
+```yaml
+2026-03-31:
+  - Interlude 1 - The Multiverse and More
+  - Episode 2 - The Wraith
 ```
 
-You can override the port:
+This means the week containing March 24–31, 2026 includes those two episodes. A query for any date from March 24 to March 31 will return this week's episodes.
 
-```bash
-PORT=4000 npm start
-```
+## Files
 
-## Endpoint
-
-`GET /episodes`
-
-Optional query parameter:
-
-- `date=YYYY-MM-DD`
-
-## Examples
-
-Default (uses current date):
-
-```bash
-curl -s "http://localhost:3000/episodes"
-```
-
-With explicit date:
-
-```bash
-curl -s "http://localhost:3000/episodes?date=2026-03-31"
-```
-
-Invalid date:
-
-```bash
-curl -s -i "http://localhost:3000/episodes?date=bad-date"
-```
-
-## Response shape (200)
-
-```json
-{
-  "requestedDate": "2026-03-31",
-  "weekStart": "2026-03-31",
-  "weekEndExclusive": "2026-04-07",
-  "episodes": [
-    {
-      "episode": "Interlude 1 - The Multiverse and More",
-      "link": "https://theletterspage.libsyn.com/interlude-1-the-multiverse-and-more"
-    },
-    {
-      "episode": "Episode 2 - The Wraith",
-      "link": "https://theletterspage.libsyn.com/episode-3-the-wraith"
-    }
-  ]
-}
-```
-
-## Error responses
-
-Invalid date format (`400`):
-
-```json
-{
-  "error": "Invalid date. Use YYYY-MM-DD."
-}
-```
-
-Out-of-range date (`404`):
-
-```json
-{
-  "error": "Date is outside the schedule range.",
-  "requestedDate": "2025-01-01",
-  "firstWeek": "2026-03-24",
-  "lastWeek": "2028-09-12"
-}
-```
+- `index.html` — HTML + CSS for the UI
+- `app.js` — Client-side logic for parsing and lookup
+- `schedule.yml` — Weekly episode schedule
+- `episodes.json` — Episode metadata with links
+- `server.js` — Optional Node.js backend API (for reference)
